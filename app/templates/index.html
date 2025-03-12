@@ -1,46 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-    {% for status in ['reading', 'to_read', 'completed', 'on_hold', 'dnf'] %}
-    <div class="bg-gruvbox-bg1 rounded-lg shadow-md p-4 sm:p-6 border border-gruvbox-bg2">
-        <h2 class="text-xl font-semibold mb-4 text-gruvbox-fg flex items-center justify-between">
-            <span>{{ status|replace('_', ' ')|title }}</span>
-            <span class="text-sm font-normal text-gruvbox-fg1">({{ books|selectattr('status', 'equalto', status)|list|length }})</span>
-        </h2>
-        <div class="space-y-4">
-            {% for book in books if book.status == status %}
-            <div id="book-{{ book.id }}" class="bg-gruvbox-bg2 rounded-lg p-3 sm:p-4 relative group border border-gruvbox-bg2 hover:border-gruvbox-blue transition-colors">
-                <div class="flex justify-between items-start gap-4">
-                    <div class="flex-grow">
-                        <h3 class="font-medium text-gruvbox-fg">{{ book.title }}</h3>
-                        {% if book.author %}
-                        <p class="text-sm text-gruvbox-fg1">{{ book.author }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="sm:opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2 shrink-0">
-                        <button hx-get="/edit-book/{{ book.id }}"
-                                hx-target="#book-{{ book.id }}"
-                                class="text-gruvbox-blue hover:text-gruvbox-aqua transition-colors">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button hx-delete="/books/{{ book.id }}"
-                                hx-target="body"
-                                hx-swap="outerHTML"
-                                hx-confirm="Are you sure you want to delete this book?"
-                                class="text-gruvbox-red hover:text-gruvbox-orange transition-colors">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-                {% if book.notes %}
-                <p class="text-sm text-gruvbox-fg1 mt-2 italic">{{ book.notes }}</p>
-                {% endif %}
-
+<div class="max-w-7xl mx-auto">
+    <!-- Header with stats -->
+    <div class="mb-8 bg-gruvbox-bg1 rounded-lg shadow-lg p-6 border border-gruvbox-bg2">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {% for status in ['reading', 'to_read', 'completed', 'on_hold', 'dnf'] %}
+            <div class="text-center">
+                <div class="text-2xl font-bold text-gruvbox-{{ {'reading': 'blue', 'to_read': 'yellow', 'completed': 'green', 'on_hold': 'purple', 'dnf': 'red'}[status] }}">{{ books|selectattr('status', 'equalto', status)|list|length }}</div>
+                <div class="text-sm text-gruvbox-fg1">{{ status|replace('_', ' ')|title }}</div>
             </div>
             {% endfor %}
         </div>
     </div>
-    {% endfor %}
+
+    <!-- Book grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for status in ['reading', 'to_read', 'completed', 'on_hold', 'dnf'] %}
+        <div class="bg-gruvbox-bg1 rounded-lg shadow-lg border border-gruvbox-bg2 overflow-hidden">
+            <div class="bg-gruvbox-{{ {'reading': 'blue', 'to_read': 'yellow', 'completed': 'green', 'on_hold': 'purple', 'dnf': 'red'}[status] }} bg-opacity-20 px-6 py-4 border-b border-gruvbox-bg2">
+                <h2 class="text-xl font-bold text-gruvbox-{{ {'reading': 'blue', 'to_read': 'yellow', 'completed': 'green', 'on_hold': 'purple', 'dnf': 'red'}[status] }} flex items-center">
+                    <i class="fas fa-{{ {'reading': 'book-open', 'to_read': 'list', 'completed': 'check', 'on_hold': 'pause', 'dnf': 'stop'}[status] }} mr-2"></i>
+                    <span>{{ status|replace('_', ' ')|title }}</span>
+                    <span class="ml-auto text-sm font-normal bg-gruvbox-bg2 px-2 py-1 rounded-full">{{ books|selectattr('status', 'equalto', status)|list|length }}</span>
+                </h2>
+            </div>
+            <div class="p-4 space-y-3">
+                {% for book in books if book.status == status %}
+                <div id="book-{{ book.id }}" 
+                     class="bg-gruvbox-bg2 rounded-lg p-4 group border border-gruvbox-bg2 hover:border-gruvbox-{{ {'reading': 'blue', 'to_read': 'yellow', 'completed': 'green', 'on_hold': 'purple', 'dnf': 'red'}[status] }} transition-all duration-200 hover:shadow-md">
+                    <div class="flex justify-between items-start gap-4">
+                        <div class="flex-grow">
+                            <h3 class="font-semibold text-gruvbox-fg group-hover:text-gruvbox-{{ {'reading': 'blue', 'to_read': 'yellow', 'completed': 'green', 'on_hold': 'purple', 'dnf': 'red'}[status] }} transition-colors">{{ book.title }}</h3>
+                            {% if book.author %}
+                            <p class="text-sm text-gruvbox-fg1 flex items-center">
+                                <i class="fas fa-user text-xs mr-1 opacity-70"></i>
+                                {{ book.author }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="sm:opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2 shrink-0">
+                            <button hx-get="/edit-book/{{ book.id }}"
+                                    hx-target="#book-{{ book.id }}"
+                                    class="text-gruvbox-{{ {'reading': 'blue', 'to_read': 'yellow', 'completed': 'green', 'on_hold': 'purple', 'dnf': 'red'}[status] }} hover:text-gruvbox-aqua transition-colors">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button hx-delete="/books/{{ book.id }}"
+                                    hx-target="body"
+                                    hx-swap="outerHTML"
+                                    hx-confirm="Are you sure you want to delete this book?"
+                                    class="text-gruvbox-red hover:text-gruvbox-orange transition-colors">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% if book.notes %}
+                    <div class="mt-2 text-sm text-gruvbox-fg1 bg-gruvbox-bg1 rounded p-2 italic border-l-2 border-gruvbox-{{ {'reading': 'blue', 'to_read': 'yellow', 'completed': 'green', 'on_hold': 'purple', 'dnf': 'red'}[status] }}">
+                        <i class="fas fa-quote-left text-xs mr-1 opacity-70"></i>
+                        {{ book.notes }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center py-8 text-gruvbox-fg1">
+                    <i class="fas fa-book text-4xl mb-2 opacity-30"></i>
+                    <p>No books yet</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
