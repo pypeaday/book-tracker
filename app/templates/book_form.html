@@ -1,0 +1,82 @@
+{% if book %}
+<div id="book-{{ book.id }}" class="bg-gruvbox-bg2 rounded-lg p-3 sm:p-4 border border-gruvbox-bg2">
+{% else %}
+<div class="max-w-2xl mx-auto bg-gruvbox-bg1 rounded-lg shadow-md p-4 sm:p-6 border border-gruvbox-bg2">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl sm:text-2xl font-semibold text-gruvbox-yellow">Add New Book</h2>
+        <button onclick="window.history.back()" 
+                class="text-gruvbox-fg hover:text-gruvbox-aqua transition-colors">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+{% endif %}
+    <form hx-{% if book %}put{% else %}post{% endif %}="/books/{% if book %}{{ book.id }}{% endif %}"
+          {% if book %}
+          hx-target="body"
+          hx-swap="outerHTML"
+          {% else %}
+          hx-target="#main-content"
+          {% endif %}
+          class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gruvbox-fg">Title</label>
+            <input type="text" 
+                   name="title" 
+                   value="{{ book.title if book else '' }}"
+                   required
+                   class="mt-1 block w-full rounded-md border-gruvbox-bg2 shadow-sm focus:ring-2 focus:ring-gruvbox-blue">
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gruvbox-fg">Author</label>
+            <input type="text" 
+                   name="author" 
+                   value="{{ book.author if book else '' }}"
+                   class="mt-1 block w-full rounded-md border-gruvbox-bg2 shadow-sm focus:ring-2 focus:ring-gruvbox-blue">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gruvbox-fg">Status</label>
+            <select name="status" 
+                    required
+                    class="mt-1 block w-full rounded-md border-gruvbox-bg2 shadow-sm focus:ring-2 focus:ring-gruvbox-blue">
+                {% for status in ['to_read', 'reading', 'completed', 'on_hold', 'dnf'] %}
+                <option value="{{ status }}" {% if book and book.status == status %}selected{% endif %}>
+                    {{ status|replace('_', ' ')|title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gruvbox-fg">Notes</label>
+            <textarea name="notes" 
+                      rows="3"
+                      class="mt-1 block w-full rounded-md border-gruvbox-bg2 shadow-sm focus:ring-2 focus:ring-gruvbox-blue">{{ book.notes if book else '' }}</textarea>
+        </div>
+
+
+
+        <div class="flex {% if book %}justify-end{% else %}justify-between{% endif %} items-center space-x-3 mt-6">
+            {% if book %}
+            <button type="button"
+                    hx-get="/books/{{ book.id }}"
+                    hx-target="#book-{{ book.id }}"
+                    class="px-4 py-2 text-sm font-medium text-gruvbox-fg bg-gruvbox-bg2 border border-gruvbox-bg2 rounded-md hover:bg-gruvbox-bg1 hover:border-gruvbox-blue transition-colors">
+                Cancel
+            </button>
+            {% else %}
+            <button type="button"
+                    onclick="window.history.back()"
+                    class="px-4 py-2 text-sm font-medium text-gruvbox-fg bg-gruvbox-bg2 border border-gruvbox-bg2 rounded-md hover:bg-gruvbox-bg1 hover:border-gruvbox-red transition-colors">
+                Cancel
+            </button>
+            {% endif %}
+            <button type="submit"
+                    class="px-4 py-2 text-sm font-medium text-gruvbox-bg bg-gruvbox-blue rounded-md hover:bg-gruvbox-aqua transition-colors flex items-center">
+                <i class="fas {% if book %}fa-save{% else %}fa-plus{% endif %} mr-2"></i>
+                {{ 'Save Changes' if book else 'Add Book' }}
+            </button>
+        </div>
+    </form>
+</div>

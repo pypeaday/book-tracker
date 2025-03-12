@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Tracking</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gruvbox: {
+                            bg: '#282828',
+                            bg1: '#3c3836',
+                            bg2: '#504945',
+                            fg: '#ebdbb2',
+                            fg1: '#d5c4a1',
+                            red: '#fb4934',
+                            green: '#b8bb26',
+                            yellow: '#fabd2f',
+                            blue: '#83a598',
+                            purple: '#d3869b',
+                            aqua: '#8ec07c',
+                            orange: '#fe8019'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .toast {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #b8bb26;
+            color: #282828;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        input, select, textarea {
+            background-color: #3c3836 !important;
+            border-color: #504945 !important;
+            color: #ebdbb2 !important;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.8) brightness(100%) sepia(100%) saturate(70%) hue-rotate(180deg);
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            input, select, textarea {
+                font-size: 16px !important; /* Prevent zoom on mobile */
+            }
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #83a598 !important;
+            --tw-ring-color: #83a598 !important;
+            --tw-ring-opacity: 1 !important;
+        }
+    </style>
+</head>
+<body class="bg-gruvbox-bg text-gruvbox-fg min-h-screen">
+    <nav class="bg-gruvbox-bg1 shadow-lg border-b border-gruvbox-bg2">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold text-gruvbox-fg hover:text-gruvbox-yellow transition-colors">📚 Book Tracker</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button hx-get="/add-book" 
+                            hx-target="#main-content"
+                            class="bg-gruvbox-blue text-gruvbox-bg px-4 py-2 rounded-lg hover:bg-gruvbox-aqua transition-colors">
+                        Add Book
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <div id="main-content" class="pb-16">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <div id="toast" class="toast" _="on htmx:afterRequest if event.detail.successful wait 0.1s add .show wait 3s remove .show"></div>
+
+    <script>
+        htmx.on("showMessage", (e) => {
+            const toast = document.getElementById("toast");
+            toast.textContent = e.detail.value;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 3000);
+        });
+    </script>
+</body>
+</html>
