@@ -74,10 +74,39 @@ pip install -r requirements.txt
 
 3. Run the application:
 ```bash
-uvicorn app.main:app --reload --port 8000 --host 0.0.0.0
+uvicorn app.main:app --reload --port 8082 --host 0.0.0.0
 ```
 
-The application will be available at `http://localhost:8000`
+The application will be available at `http://localhost:8082`
+
+### Loading Sample Data
+
+To populate the database with sample books:
+
+1. First, make sure the application is running:
+```bash
+uvicorn app.main:app --reload --port 8082 --host 0.0.0.0
+```
+
+2. Then in another terminal, run the populate script:
+```bash
+# Make sure your virtual environment is activated first
+source venv/bin/activate  # On Linux/Mac
+
+# Install dependencies if needed
+pip install -r requirements.txt
+
+# Run the populate script
+python scripts/populate_db.py
+```
+
+This will add 10 sample books across different reading statuses with notes and dates, including:
+- Currently reading books (Dune, The Way of Kings)
+- Completed books with reviews
+- Books on the to-read list
+- Books on hold or DNF with explanations
+
+The script uses the application's API endpoints, so it requires the app to be running at http://localhost:8082.
 
 ## Features
 

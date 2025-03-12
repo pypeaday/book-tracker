@@ -1,12 +1,29 @@
 from fastapi import FastAPI, Depends, HTTPException, Request, Form
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, List
+from pydantic import BaseModel
+from datetime import datetime
 
 from . import models, database
 
 app = FastAPI(title="Book Tracking API")
 templates = Jinja2Templates(directory="app/templates")
+
+# API Models
+class BookCreate(BaseModel):
+    title: str
+    author: Optional[str] = None
+    status: str
+    notes: Optional[str] = None
+    start_date: Optional[datetime] = None
+    completion_date: Optional[datetime] = None
+
+class Book(BookCreate):
+    id: int
+    
+    class Config:
+        from_attributes = True
 
 # Create tables
 models.Base.metadata.create_all(bind=database.engine)
@@ -27,6 +44,30 @@ def edit_book_form(request: Request, book_id: int, db: Session = Depends(databas
         raise HTTPException(status_code=404, detail="Book not found")
     return templates.TemplateResponse("book_form.html", {"request": request, "book": book})
 
+# JSON API endpoints
+@app.get("/api/books/", response_model=List[Book])
+def list_books(db: Session = Depends(database.get_db)):
+    books = db.query(models.Book).all()
+    return books
+
+@app.post("/api/books/", response_model=Book)
+def create_book_api(book: BookCreate, db: Session = Depends(database.get_db)):
+    db_book = models.Book(**book.model_dump())
+    db.add(db_book)
+    db.commit()
+    db.refresh(db_book)
+    return db_book
+
+@app.delete("/api/books/{book_id}")
+def delete_book_api(book_id: int, db: Session = Depends(database.get_db)):
+    db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if db_book is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    db.delete(db_book)
+    db.commit()
+    return {"ok": True}
+
+# Template endpoints
 @app.get("/books/{book_id}")
 def get_book(request: Request, book_id: int, db: Session = Depends(database.get_db)):
     book = db.query(models.Book).filter(models.Book.id == book_id).first()

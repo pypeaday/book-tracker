@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, Text
+from sqlalchemy import Column, Integer, String, Enum, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -11,3 +11,5 @@ class Book(Base):
     author = Column(String(255))
     status = Column(Enum('to_read', 'reading', 'completed', 'on_hold', 'dnf', name='book_status'), nullable=False)
     notes = Column(Text)
+    start_date = Column(DateTime, nullable=True)
+    completion_date = Column(DateTime, nullable=True)

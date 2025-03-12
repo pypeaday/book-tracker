@@ -18,6 +18,9 @@ RUN useradd -m appuser && \
     chown -R appuser:appuser /app && \
     chmod 755 /app/data
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
 
 USER appuser
 
@@ -33,5 +36,5 @@ RUN uv sync
 # Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use entrypoint script
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
