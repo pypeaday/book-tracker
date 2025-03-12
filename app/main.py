@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, Request, Form
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 
 from . import models, database
@@ -18,6 +18,13 @@ class BookCreate(BaseModel):
     notes: Optional[str] = None
     start_date: Optional[datetime] = None
     completion_date: Optional[datetime] = None
+    rating: Optional[int] = None
+
+    @field_validator('rating')
+    def validate_rating(cls, v):
+        if v is not None and not (0 <= v <= 3):
+            raise ValueError('Rating must be between 0 and 3')
+        return v
 
 class Book(BookCreate):
     id: int
@@ -52,7 +59,11 @@ def list_books(db: Session = Depends(database.get_db)):
 
 @app.post("/api/books/", response_model=Book)
 def create_book_api(book: BookCreate, db: Session = Depends(database.get_db)):
-    db_book = models.Book(**book.model_dump())
+    # Convert empty string rating to None
+    data = book.model_dump()
+    if data.get('rating') == "":
+        data['rating'] = None
+    db_book = models.Book(**data)
     db.add(db_book)
     db.commit()
     db.refresh(db_book)
@@ -82,13 +93,15 @@ def create_book(
     author: Optional[str] = Form(None),
     status: str = Form(...),
     notes: Optional[str] = Form(None),
+    rating: Optional[int] = Form(None),
     db: Session = Depends(database.get_db)
 ):
     book_data = {
         "title": title,
         "author": author,
         "status": status,
-        "notes": notes
+        "notes": notes,
+        "rating": rating if rating != "" else None
     }
     
     db_book = models.Book(**book_data)
@@ -107,6 +120,7 @@ def update_book(
     author: Optional[str] = Form(None),
     status: str = Form(...),
     notes: Optional[str] = Form(None),
+    rating: Optional[int] = Form(None),
     db: Session = Depends(database.get_db)
 ):
     db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
@@ -117,7 +131,8 @@ def update_book(
         "title": title,
         "author": author,
         "status": status,
-        "notes": notes
+        "notes": notes,
+        "rating": rating if rating != "" else None
     }
     
     for key, value in book_data.items():

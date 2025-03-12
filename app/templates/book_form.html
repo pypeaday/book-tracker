@@ -55,6 +55,17 @@
                       class="mt-1 block w-full rounded-md border-gruvbox-bg2 shadow-sm focus:ring-2 focus:ring-gruvbox-blue">{{ book.notes if book else '' }}</textarea>
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-gruvbox-fg">Rating</label>
+            <select name="rating" 
+                    class="mt-1 block w-full rounded-md border-gruvbox-bg2 shadow-sm focus:ring-2 focus:ring-gruvbox-blue">
+                <option value="">No Rating</option>
+                <option value="3" {% if book and book.rating == 3 %}selected{% endif %}>⭐⭐⭐ Would recommend</option>
+                <option value="2" {% if book and book.rating == 2 %}selected{% endif %}>⭐⭐ Good but not recommendable</option>
+                <option value="1" {% if book and book.rating == 1 %}selected{% endif %}>⭐ Wouldn't read again</option>
+                <option value="0" {% if book and book.rating == 0 %}selected{% endif %}>DNF - So bad I didn't finish</option>
+            </select>
+        </div>
 
 
         <div class="flex {% if book %}justify-end{% else %}justify-between{% endif %} items-center space-x-3 mt-6">

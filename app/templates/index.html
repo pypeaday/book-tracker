@@ -38,6 +38,25 @@
                                 {{ book.author }}
                             </p>
                             {% endif %}
+                            {% if book.rating is not none %}
+                            <div class="mt-2 flex items-center gap-2">
+                                <div class="bg-gruvbox-bg1 rounded-full px-3 py-1 text-sm inline-flex items-center gap-1">
+                                    {% if book.rating == 3 %}
+                                    <span class="text-gruvbox-green">⭐⭐⭐</span>
+                                    <span class="text-gruvbox-green text-xs">Would recommend</span>
+                                    {% elif book.rating == 2 %}
+                                    <span class="text-gruvbox-yellow">⭐⭐</span>
+                                    <span class="text-gruvbox-yellow text-xs">Good</span>
+                                    {% elif book.rating == 1 %}
+                                    <span class="text-gruvbox-orange">⭐</span>
+                                    <span class="text-gruvbox-orange text-xs">Wouldn't read again</span>
+                                    {% elif book.rating == 0 %}
+                                    <span class="text-gruvbox-red"><i class="fas fa-ban"></i></span>
+                                    <span class="text-gruvbox-red text-xs">DNF</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                         <div class="sm:opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2 shrink-0">
                             <button hx-get="/edit-book/{{ book.id }}"

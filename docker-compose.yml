@@ -7,8 +7,6 @@ services:
       - "8082:8000"
     volumes:
       - ./data:/app/data
+      - ./migrations:/app/migrations
+      - ./alembic.ini:/app/alembic.ini
     restart: unless-stopped
-
-volumes:
-  book_data:
-    name: book_tracking_data

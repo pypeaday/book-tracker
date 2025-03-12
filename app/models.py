@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, Text, DateTime
+from sqlalchemy import Column, Integer, String, Enum, Text, DateTime, SmallInteger
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -13,3 +13,4 @@ class Book(Base):
     notes = Column(Text)
     start_date = Column(DateTime, nullable=True)
     completion_date = Column(DateTime, nullable=True)
+    rating = Column(SmallInteger, nullable=True, comment='0: DNF, 1: Wouldn\'t read again, 2: Good but not recommendable, 3: Would recommend')
