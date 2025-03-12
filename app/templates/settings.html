@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-theme-bg1 rounded-lg shadow-lg p-6 border border-theme-bg2">
+        <h1 class="text-2xl font-bold text-theme-accent mb-6">Settings</h1>
+        
+        <!-- Theme Selection -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-theme-fg mb-4">Theme</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for theme_name, theme_colors in themes.items() %}
+                <div class="relative">
+                    <input type="radio" 
+                           name="theme" 
+                           id="theme-{{ theme_name }}" 
+                           value="{{ theme_name }}"
+                           class="peer absolute opacity-0"
+                           hx-post="/settings/theme"
+                           hx-vals='{"theme_name": "{{ theme_name }}"}'
+                           hx-swap="none"
+                           {% if theme_name == current_theme %}checked{% endif %}>
+                    <label for="theme-{{ theme_name }}" 
+                           class="block p-4 rounded-lg cursor-pointer border-2 border-theme-bg2 bg-theme-bg transition-all duration-200 peer-checked:ring-2 peer-checked:ring-theme-accent">
+                        <div class="font-semibold mb-2 text-theme-fg">
+                            {{ theme_name|replace('-', ' ')|title }}
+                        </div>
+                        <div class="grid grid-cols-4 gap-1">
+                            <div class="w-6 h-6 rounded bg-theme-accent"></div>
+                            <div class="w-6 h-6 rounded bg-theme-success"></div>
+                            <div class="w-6 h-6 rounded bg-theme-error"></div>
+                            <div class="w-6 h-6 rounded bg-theme-accent_hover"></div>
+                        </div>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

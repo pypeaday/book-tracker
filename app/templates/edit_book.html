@@ -1,30 +1,30 @@
-<div class="bg-gruvbox-bg2 rounded-lg p-4 group border border-gruvbox-bg2">
+<div class="bg-theme-bg2 rounded-lg p-4 group border border-theme-bg2">
     <form hx-put="/books/{{ book.id }}"
           hx-target="body"
           hx-swap="outerHTML"
           class="space-y-4">
         <div>
-            <label for="title" class="block text-sm font-medium text-gruvbox-fg1">Title</label>
+            <label for="title" class="block text-sm font-medium text-theme-fg">Title</label>
             <input type="text" 
                    name="title" 
                    id="title" 
                    value="{{ book.title }}"
-                   class="mt-1 block w-full rounded-md bg-gruvbox-bg1 border border-gruvbox-bg3 text-gruvbox-fg focus:border-gruvbox-blue focus:ring focus:ring-gruvbox-blue focus:ring-opacity-50"
+                   class="mt-1 block w-full rounded-md bg-theme-bg1 border border-theme-bg2 text-theme-fg focus:border-theme-accent focus:ring focus:ring-theme-accent focus:ring-opacity-50"
                    required>
         </div>
         <div>
-            <label for="author" class="block text-sm font-medium text-gruvbox-fg1">Author</label>
+            <label for="author" class="block text-sm font-medium text-theme-fg">Author</label>
             <input type="text" 
                    name="author" 
                    id="author" 
                    value="{{ book.author or '' }}"
-                   class="mt-1 block w-full rounded-md bg-gruvbox-bg1 border border-gruvbox-bg3 text-gruvbox-fg focus:border-gruvbox-blue focus:ring focus:ring-gruvbox-blue focus:ring-opacity-50">
+                   class="mt-1 block w-full rounded-md bg-theme-bg1 border border-theme-bg2 text-theme-fg focus:border-theme-accent focus:ring focus:ring-theme-accent focus:ring-opacity-50">
         </div>
         <div>
-            <label for="status" class="block text-sm font-medium text-gruvbox-fg1">Status</label>
+            <label for="status" class="block text-sm font-medium text-theme-fg">Status</label>
             <select name="status" 
                     id="status"
-                    class="mt-1 block w-full rounded-md bg-gruvbox-bg1 border border-gruvbox-bg3 text-gruvbox-fg focus:border-gruvbox-blue focus:ring focus:ring-gruvbox-blue focus:ring-opacity-50"
+                    class="mt-1 block w-full rounded-md bg-theme-bg1 border border-theme-bg2 text-theme-fg focus:border-theme-accent focus:ring focus:ring-theme-accent focus:ring-opacity-50"
                     required>
                 {% for status_option in ['to_read', 'reading', 'completed', 'on_hold', 'dnf'] %}
                 <option value="{{ status_option }}" {% if book.status == status_option %}selected{% endif %}>
@@ -34,10 +34,10 @@
             </select>
         </div>
         <div>
-            <label for="rating" class="block text-sm font-medium text-gruvbox-fg1">Rating</label>
+            <label for="rating" class="block text-sm font-medium text-theme-fg">Rating</label>
             <select name="rating" 
                     id="rating"
-                    class="mt-1 block w-full rounded-md bg-gruvbox-bg1 border border-gruvbox-bg3 text-gruvbox-fg focus:border-gruvbox-blue focus:ring focus:ring-gruvbox-blue focus:ring-opacity-50">
+                    class="mt-1 block w-full rounded-md bg-theme-bg1 border border-theme-bg2 text-theme-fg focus:border-theme-accent focus:ring focus:ring-theme-accent focus:ring-opacity-50">
                 <option value="">No Rating</option>
                 <option value="3" {% if book.rating == 3 %}selected{% endif %}>⭐⭐⭐ Would recommend</option>
                 <option value="2" {% if book.rating == 2 %}selected{% endif %}>⭐⭐ Good but not recommendable</option>
@@ -46,22 +46,22 @@
             </select>
         </div>
         <div>
-            <label for="notes" class="block text-sm font-medium text-gruvbox-fg1">Notes</label>
+            <label for="notes" class="block text-sm font-medium text-theme-fg">Notes</label>
             <textarea name="notes" 
                       id="notes"
                       rows="3"
-                      class="mt-1 block w-full rounded-md bg-gruvbox-bg1 border border-gruvbox-bg3 text-gruvbox-fg focus:border-gruvbox-blue focus:ring focus:ring-gruvbox-blue focus:ring-opacity-50">{{ book.notes or '' }}</textarea>
+                      class="mt-1 block w-full rounded-md bg-theme-bg1 border border-theme-bg2 text-theme-fg focus:border-theme-accent focus:ring focus:ring-theme-accent focus:ring-opacity-50">{{ book.notes or '' }}</textarea>
         </div>
         <div class="flex justify-end space-x-3">
             <button type="button"
                     hx-get="/"
                     hx-target="body"
                     hx-swap="outerHTML"
-                    class="px-4 py-2 rounded-md text-gruvbox-fg1 bg-gruvbox-bg3 hover:bg-gruvbox-bg4 focus:outline-none focus:ring-2 focus:ring-gruvbox-bg4 focus:ring-opacity-50">
+                    class="px-4 py-2 rounded-md text-theme-fg bg-theme-bg2 hover:bg-theme-bg1 focus:outline-none focus:ring-2 focus:ring-theme-accent focus:ring-opacity-50">
                 Cancel
             </button>
             <button type="submit"
-                    class="px-4 py-2 rounded-md text-gruvbox-bg0 bg-gruvbox-blue hover:bg-gruvbox-blue-bright focus:outline-none focus:ring-2 focus:ring-gruvbox-blue focus:ring-opacity-50">
+                    class="px-4 py-2 rounded-md text-theme-bg bg-theme-accent hover:bg-theme-accent_hover focus:outline-none focus:ring-2 focus:ring-theme-accent focus:ring-opacity-50">
                 Save
             </button>
         </div>

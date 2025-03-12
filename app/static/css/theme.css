@@ -1,0 +1,25 @@
+/* Default theme (Gruvbox Dark) */
+:root {
+  --theme-bg: #282828;
+  --theme-bg1: #3c3836;
+  --theme-bg2: #504945;
+  --theme-fg: #ebdbb2;
+  --theme-fg1: #d5c4a1;
+  --theme-accent: #83a598;
+  --theme-accent_hover: #8ec07c;
+  --theme-success: #b8bb26;
+  --theme-error: #fb4934;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --theme-bg: #ffffff;
+  --theme-bg1: #f3f4f6;
+  --theme-bg2: #e5e7eb;
+  --theme-fg: #111827;
+  --theme-fg1: #4b5563;
+  --theme-accent: #3b82f6;
+  --theme-accent_hover: #2563eb;
+  --theme-success: #10b981;
+  --theme-error: #ef4444;
+}

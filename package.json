@@ -1,0 +1,11 @@
+{
+  "name": "book-tracking",
+  "version": "1.0.0",
+  "description": "Book tracking application",
+  "scripts": {
+    "build:css": "tailwindcss -i ./app/static/src/main.css -o ./app/static/dist/main.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}

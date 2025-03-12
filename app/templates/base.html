@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="{{ current_theme }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,24 +8,29 @@
     <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/theme.css" rel="stylesheet">
     <script>
+        htmx.on('htmx:afterRequest', (evt) => {
+            if (evt.detail.pathInfo.requestPath === '/settings/theme') {
+                const themeInput = evt.detail.requestConfig.parameters.theme_name;
+                document.documentElement.dataset.theme = themeInput;
+            }
+        });
+
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        gruvbox: {
-                            bg: '#282828',
-                            bg1: '#3c3836',
-                            bg2: '#504945',
-                            fg: '#ebdbb2',
-                            fg1: '#d5c4a1',
-                            red: '#fb4934',
-                            green: '#b8bb26',
-                            yellow: '#fabd2f',
-                            blue: '#83a598',
-                            purple: '#d3869b',
-                            aqua: '#8ec07c',
-                            orange: '#fe8019'
+                        theme: {
+                            bg: 'var(--theme-bg)',
+                            bg1: 'var(--theme-bg1)',
+                            bg2: 'var(--theme-bg2)',
+                            fg: 'var(--theme-fg)',
+                            fg1: 'var(--theme-fg1)',
+                            accent: 'var(--theme-accent)',
+                            accent_hover: 'var(--theme-accent_hover)',
+                            success: 'var(--theme-success)',
+                            error: 'var(--theme-error)'
                         }
                     }
                 }
@@ -34,31 +39,40 @@
     </script>
     <style>
         [x-cloak] { display: none !important; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--theme-bg);
+            color: var(--theme-fg);
+        }
         .toast {
             position: fixed;
             bottom: 1rem;
             right: 1rem;
             padding: 1rem;
             border-radius: 0.5rem;
-            background-color: #b8bb26;
-            color: #282828;
+            background-color: var(--theme-success);
+            color: var(--theme-bg);
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
+            border: 1px solid var(--theme-bg2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         .toast.show {
             opacity: 1;
         }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-        }
         input, select, textarea {
-            background-color: #3c3836 !important;
-            border-color: #504945 !important;
-            color: #ebdbb2 !important;
+            background-color: var(--theme-bg1);
+            border-color: var(--theme-bg2);
+            color: var(--theme-fg);
         }
         input[type="date"]::-webkit-calendar-picker-indicator {
             filter: invert(0.8) brightness(100%) sepia(100%) saturate(70%) hue-rotate(180deg);
             cursor: pointer;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--theme-accent);
+            --tw-ring-color: var(--theme-accent);
+            --tw-ring-opacity: 1;
         }
         @media (max-width: 768px) {
             .container {
@@ -66,27 +80,25 @@
                 padding-right: 1rem;
             }
             input, select, textarea {
-                font-size: 16px !important; /* Prevent zoom on mobile */
+                font-size: 16px; /* Prevent zoom on mobile */
             }
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #83a598 !important;
-            --tw-ring-color: #83a598 !important;
-            --tw-ring-opacity: 1 !important;
         }
     </style>
 </head>
-<body class="bg-gruvbox-bg text-gruvbox-fg min-h-screen">
-    <nav class="bg-gruvbox-bg1 shadow-lg border-b border-gruvbox-bg2">
+<body class="min-h-screen">
+    <nav class="bg-theme-bg1 shadow-lg border-b border-theme-bg2">
         <div class="max-w-6xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <a href="/" class="text-xl font-bold text-gruvbox-fg hover:text-gruvbox-yellow transition-colors">📚 Book Tracker</a>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-xl font-bold text-theme-fg hover:text-theme-accent transition-colors">📚 Book Tracker</a>
+                    <a href="/settings" class="text-theme-fg1 hover:text-theme-accent transition-colors">
+                        <i class="fas fa-cog"></i>
+                    </a>
                 </div>
                 <div class="flex items-center space-x-4">
                     <button hx-get="/add-book" 
                             hx-target="#main-content"
-                            class="bg-gruvbox-blue text-gruvbox-bg px-4 py-2 rounded-lg hover:bg-gruvbox-aqua transition-colors">
+                            class="bg-theme-accent text-theme-bg px-4 py-2 rounded-lg hover:bg-theme-accent_hover transition-colors">
                         Add Book
                     </button>
                 </div>

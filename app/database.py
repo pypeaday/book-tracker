@@ -6,10 +6,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Create data directory if it doesn't exist
+data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+os.makedirs(data_dir, exist_ok=True)
+
 # Always use data directory for database
 SQLALCHEMY_DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "sqlite:///./data/books.db"
+    f"sqlite:///{os.path.join(data_dir, 'books.db')}"
 )
 
 # Ensure SQLite connection works with check_same_thread=False
