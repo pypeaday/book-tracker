@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8082:8000"
+    volumes:
+      - book_data:/app/data
+    environment:
+      - DATABASE_URL=sqlite:///data/books.db
+    restart: unless-stopped
+
+volumes:
+  book_data:
+    name: book_tracking_data
