@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Request, Form, Cookie
+from fastapi import FastAPI, Depends, HTTPException, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -18,14 +18,38 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 # Default theme
 DEFAULT_THEME = "gruvbox-dark"
 
-def get_current_theme(theme_name: Optional[str] = Cookie(default=DEFAULT_THEME)) -> themes.ThemeColors:
+def get_current_theme(request: Request) -> tuple[themes.ThemeColors, str]:
     """Get the current theme colors based on cookie or default"""
+    theme_name = request.cookies.get("theme", DEFAULT_THEME)
     theme = themes.get_theme(theme_name)
     if not theme:
         theme = themes.get_theme(DEFAULT_THEME)
-    return theme
+        theme_name = DEFAULT_THEME
+    return theme, theme_name
+
+def set_theme_cookie(response: HTMLResponse, theme_name: str) -> None:
+    """Set theme cookie with standard parameters"""
+    response.set_cookie(
+        key="theme",
+        value=theme_name,
+        max_age=31536000,  # 1 year
+        httponly=False,  # Allow JavaScript to read the cookie
+        samesite="lax",
+        secure=False  # Allow non-HTTPS for local development
+    )
 
 # API Models
+class ThemeColors(BaseModel):
+    bg: str
+    bg1: str
+    bg2: str
+    fg: str
+    fg1: str
+    accent: str
+    accent_hover: str
+    success: str
+    error: str
+
 class BookCreate(BaseModel):
     title: str
     author: Optional[str] = None
@@ -51,21 +75,42 @@ class Book(BookCreate):
 models.Base.metadata.create_all(bind=database.engine)
 
 @app.get("/")
-def home(request: Request, db: Session = Depends(database.get_db), theme: themes.ThemeColors = Depends(get_current_theme)):
+def home(request: Request, db: Session = Depends(database.get_db)):
     books = db.query(models.Book).all()
-    return templates.TemplateResponse("index.html", {"request": request, "books": books, "theme": theme})
+    theme, current_theme = get_current_theme(request)
+    response = templates.TemplateResponse(
+        "index.html",
+        {"request": request, "books": books, "theme": theme, "current_theme": current_theme}
+    )
+    response.set_cookie(
+        key="theme",
+        value=current_theme,
+        max_age=31536000,  # 1 year
+        httponly=False,  # Allow JavaScript to read the cookie
+        samesite="lax",
+        secure=False  # Allow non-HTTPS for local development
+    )
+    return response
 
 @app.get("/settings")
-def settings_page(request: Request, theme: themes.ThemeColors = Depends(get_current_theme)):
-    return templates.TemplateResponse(
+def settings_page(request: Request):
+    theme, current_theme = get_current_theme(request)
+    # Create a dict of theme names and their colors
+    theme_previews = {name: colors for name, colors in themes.THEMES.items()}
+    # Sort themes alphabetically for consistent display
+    theme_previews = dict(sorted(theme_previews.items()))
+    
+    response = templates.TemplateResponse(
         "settings.html",
         {
             "request": request,
-            "themes": themes.THEMES,
-            "current_theme": next((name for name, t in themes.THEMES.items() if t == theme), None),
+            "theme_previews": theme_previews,
+            "current_theme": current_theme,
             "theme": theme
         }
     )
+    set_theme_cookie(response, current_theme)
+    return response
 
 @app.post("/settings/theme")
 def update_theme(request: Request, theme_name: str = Form(...)):
@@ -74,22 +119,55 @@ def update_theme(request: Request, theme_name: str = Form(...)):
     
     # Update the HTML data-theme attribute via HTMX response
     response = HTMLResponse("", status_code=200)
-    response.set_cookie(key="theme", value=theme_name, max_age=31536000)  # 1 year
+    set_theme_cookie(response, theme_name)
     response.headers["HX-Trigger"] = "themeChanged"
     return response
 
 @app.get("/add-book")
-def add_book_form(request: Request, theme: themes.ThemeColors = Depends(get_current_theme)):
-    return templates.TemplateResponse("book_form.html", {"request": request, "book": None, "theme": theme})
+def add_book_form(request: Request):
+    theme, current_theme = get_current_theme(request)
+    response = templates.TemplateResponse(
+        "book_form.html",
+        {"request": request, "book": None, "theme": theme, "current_theme": current_theme}
+    )
+    response.set_cookie(
+        key="theme",
+        value=current_theme,
+        max_age=31536000,  # 1 year
+        httponly=False,  # Allow JavaScript to read the cookie
+        samesite="lax",
+        secure=False  # Allow non-HTTPS for local development
+    )
+    return response
 
 @app.get("/edit-book/{book_id}")
-def edit_book_form(request: Request, book_id: int, db: Session = Depends(database.get_db), theme: themes.ThemeColors = Depends(get_current_theme)):
+def edit_book_form(request: Request, book_id: int, db: Session = Depends(database.get_db)):
     book = db.query(models.Book).filter(models.Book.id == book_id).first()
     if book is None:
         raise HTTPException(status_code=404, detail="Book not found")
-    return templates.TemplateResponse("book_form.html", {"request": request, "book": book, "theme": theme})
+    theme, current_theme = get_current_theme(request)
+    response = templates.TemplateResponse(
+        "book_form.html",
+        {"request": request, "book": book, "theme": theme, "current_theme": current_theme}
+    )
+    response.set_cookie(
+        key="theme",
+        value=current_theme,
+        max_age=31536000,  # 1 year
+        httponly=False,  # Allow JavaScript to read the cookie
+        samesite="lax",
+        secure=False  # Allow non-HTTPS for local development
+    )
+    return response
 
 # JSON API endpoints
+@app.get("/api/theme/{theme_name}", response_model=ThemeColors)
+def get_theme_colors(theme_name: str):
+    theme = themes.get_theme(theme_name)
+    if not theme:
+        raise HTTPException(status_code=404, detail=f"Theme '{theme_name}' not found")
+    return theme
+
 @app.get("/api/books/", response_model=List[Book])
 def list_books(db: Session = Depends(database.get_db)):
     books = db.query(models.Book).all()
@@ -132,8 +210,7 @@ def create_book(
     status: str = Form(...),
     notes: Optional[str] = Form(None),
     rating: Optional[int] = Form(None),
-    db: Session = Depends(database.get_db),
-    theme: themes.ThemeColors = Depends(get_current_theme)
+    db: Session = Depends(database.get_db)
 ):
     book_data = {
         "title": title,
@@ -149,7 +226,20 @@ def create_book(
     db.refresh(db_book)
     
     books = db.query(models.Book).all()
-    return templates.TemplateResponse("index.html", {"request": request, "books": books})
+    theme, current_theme = get_current_theme(request)
+    response = templates.TemplateResponse(
+        "index.html",
+        {"request": request, "books": books, "theme": theme, "current_theme": current_theme}
+    )
+    response.set_cookie(
+        key="theme",
+        value=current_theme,
+        max_age=31536000,  # 1 year
+        httponly=False,  # Allow JavaScript to read the cookie
+        samesite="lax",
+        secure=False  # Allow non-HTTPS for local development
+    )
+    return response
 
 @app.put("/books/{book_id}")
 def update_book(
@@ -160,8 +250,7 @@ def update_book(
     status: str = Form(...),
     notes: Optional[str] = Form(None),
     rating: Optional[int] = Form(None),
-    db: Session = Depends(database.get_db),
-    theme: themes.ThemeColors = Depends(get_current_theme)
+    db: Session = Depends(database.get_db)
 ):
     db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
     if db_book is None:
@@ -183,10 +272,23 @@ def update_book(
     
     # Get all books for the full page refresh
     books = db.query(models.Book).all()
-    return templates.TemplateResponse("index.html", {"request": request, "books": books})
+    theme, current_theme = get_current_theme(request)
+    response = templates.TemplateResponse(
+        "index.html",
+        {"request": request, "books": books, "theme": theme, "current_theme": current_theme}
+    )
+    response.set_cookie(
+        key="theme",
+        value=current_theme,
+        max_age=31536000,  # 1 year
+        httponly=False,  # Allow JavaScript to read the cookie
+        samesite="lax",
+        secure=False  # Allow non-HTTPS for local development
+    )
+    return response
 
 @app.delete("/books/{book_id}")
-def delete_book(request: Request, book_id: int, db: Session = Depends(database.get_db), theme: themes.ThemeColors = Depends(get_current_theme)):
+def delete_book(request: Request, book_id: int, db: Session = Depends(database.get_db)):
     db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
     if db_book is None:
         raise HTTPException(status_code=404, detail="Book not found")
@@ -196,4 +298,17 @@ def delete_book(request: Request, book_id: int, db: Session = Depends(database.g
     
     # Get all books for the full page refresh
     books = db.query(models.Book).all()
-    return templates.TemplateResponse("index.html", {"request": request, "books": books})
+    theme, current_theme = get_current_theme(request)
+    response = templates.TemplateResponse(
+        "index.html",
+        {"request": request, "books": books, "theme": theme, "current_theme": current_theme}
+    )
+    response.set_cookie(
+        key="theme",
+        value=current_theme,
+        max_age=31536000,  # 1 year
+        httponly=False,  # Allow JavaScript to read the cookie
+        samesite="lax",
+        secure=False  # Allow non-HTTPS for local development
+    )
+    return response

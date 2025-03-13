@@ -38,6 +38,50 @@ THEMES: Dict[str, ThemeColors] = {
         accent_hover="#2563eb",
         success="#10b981",
         error="#ef4444"
+    ),
+    "nord": ThemeColors(
+        bg="#2e3440",  # Polar Night
+        bg1="#3b4252",
+        bg2="#434c5e",
+        fg="#eceff4",  # Snow Storm
+        fg1="#d8dee9",
+        accent="#88c0d0",  # Frost
+        accent_hover="#81a1c1",
+        success="#a3be8c",  # Aurora
+        error="#bf616a"
+    ),
+    "dracula": ThemeColors(
+        bg="#282a36",  # Background
+        bg1="#44475a",  # Current Line
+        bg2="#6272a4",  # Selection
+        fg="#f8f8f2",  # Foreground
+        fg1="#bfbfbf",
+        accent="#bd93f9",  # Purple
+        accent_hover="#ff79c6",  # Pink
+        success="#50fa7b",  # Green
+        error="#ff5555"  # Red
+    ),
+    "solarized-dark": ThemeColors(
+        bg="#002b36",  # Base03
+        bg1="#073642",  # Base02
+        bg2="#586e75",  # Base01
+        fg="#fdf6e3",  # Base3
+        fg1="#eee8d5",  # Base2
+        accent="#268bd2",  # Blue
+        accent_hover="#2aa198",  # Cyan
+        success="#859900",  # Green
+        error="#dc322f"  # Red
+    ),
+    "solarized-light": ThemeColors(
+        bg="#fdf6e3",  # Base3
+        bg1="#eee8d5",  # Base2
+        bg2="#93a1a1",  # Base1
+        fg="#002b36",  # Base03
+        fg1="#073642",  # Base02
+        accent="#268bd2",  # Blue
+        accent_hover="#2aa198",  # Cyan
+        success="#859900",  # Green
+        error="#dc322f"  # Red
     )
 }
 
