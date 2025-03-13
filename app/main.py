@@ -287,6 +287,41 @@ def update_book(
     )
     return response
 
+@app.patch("/books/{book_id}/status")
+async def update_book_status(request: Request, book_id: int, status: str = Form(...), db: Session = Depends(database.get_db)):
+    print(f"Updating book {book_id} status to {status}")
+    
+    # Find the book
+    db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if db_book is None:
+        print(f"Book {book_id} not found")
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    # Update the status
+    old_status = db_book.status
+    db_book.status = status
+    db.commit()
+    db.refresh(db_book)
+    print(f"Book {book_id} status updated from {old_status} to {status}")
+    
+    # Return the updated book card
+    theme, current_theme = get_current_theme(request)
+    
+    # Create context for template rendering
+    context = {
+        "request": request, 
+        "book": db_book, 
+        "theme": theme, 
+        "current_theme": current_theme
+    }
+    
+    # Render the template directly
+    html_content = templates.get_template("partials/book_card.html").render(context)
+    print(f"Returning HTML response for book {book_id}: {html_content[:100]}...")
+    
+    # Return the HTML content directly
+    return HTMLResponse(content=html_content, status_code=200)
+
 @app.delete("/books/{book_id}")
 def delete_book(request: Request, book_id: int, db: Session = Depends(database.get_db)):
     db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
