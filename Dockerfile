@@ -2,7 +2,8 @@ FROM python:3.11-slim
 
 # Set environment variables
 ENV VIRTUAL_ENV=/app/.venv \
-    PATH="/app/.venv/bin:$PATH"
+    PATH="/app/.venv/bin:$PATH" \
+    IN_DOCKER=true
 
 # Install uv
 RUN pip install uv
@@ -11,12 +12,12 @@ RUN pip install uv
 WORKDIR /app
 
 # Create data directory for SQLite database
-RUN mkdir /app/data
+RUN mkdir -p /app/data
 
 # Create a non-root user and set permissions
 RUN useradd -m appuser && \
     chown -R appuser:appuser /app && \
-    chmod 755 /app/data
+    chmod 777 /app/data
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /app/
