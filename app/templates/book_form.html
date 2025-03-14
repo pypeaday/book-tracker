@@ -71,7 +71,7 @@
         <div class="flex {% if book %}justify-end{% else %}justify-between{% endif %} items-center space-x-3 mt-6">
             {% if book %}
             <button type="button"
-                    hx-get="/books/{{ book.id }}"
+                    hx-get="/books/{{ book.id }}?format=card"
                     hx-target="#book-{{ book.id }}"
                     class="px-4 py-2 text-sm font-medium text-theme-fg bg-theme-bg2 border border-theme-bg2 rounded-md hover:bg-theme-bg1 hover:border-theme-accent transition-colors">
                 Cancel

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, Request, Form
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import Optional, List
@@ -200,7 +200,25 @@ def get_book(request: Request, book_id: int, db: Session = Depends(database.get_
     book = db.query(models.Book).filter(models.Book.id == book_id).first()
     if book is None:
         raise HTTPException(status_code=404, detail="Book not found")
-    return templates.TemplateResponse("book_form.html", {"request": request, "book": book})
+    
+    # Get theme information
+    theme, current_theme = get_current_theme(request)
+    
+    # Check if we should return the card or the form
+    format_param = request.query_params.get('format', 'form')
+    
+    if format_param == 'card':
+        # Return just the book card
+        context = {
+            "request": request, 
+            "book": book, 
+            "theme": theme, 
+            "current_theme": current_theme
+        }
+        return templates.TemplateResponse("partials/book_card.html", context)
+    else:
+        # Return the edit form
+        return templates.TemplateResponse("book_form.html", {"request": request, "book": book, "theme": theme, "current_theme": current_theme})
 
 @app.post("/books/")
 def create_book(
@@ -317,10 +335,19 @@ async def update_book_status(request: Request, book_id: int, status: str = Form(
     
     # Render the template directly
     html_content = templates.get_template("partials/book_card.html").render(context)
-    print(f"Returning HTML response for book {book_id}: {html_content[:100]}...")
+    print(f"Returning JSON response for book {book_id}")
     
-    # Return the HTML content directly
-    return HTMLResponse(content=html_content, status_code=200)
+    # Return JSON with both HTML content and book data
+    return JSONResponse(content={
+        "html": html_content,
+        "book": {
+            "id": db_book.id,
+            "title": db_book.title,
+            "author": db_book.author,
+            "status": db_book.status,
+            "rating": db_book.rating
+        }
+    }, status_code=200)
 
 @app.delete("/books/{book_id}")
 def delete_book(request: Request, book_id: int, db: Session = Depends(database.get_db)):
