@@ -15,13 +15,13 @@ This document contains technical information for developers working on the Book 
 #### 1. Using Docker Compose:
 ```bash
 # Build and start the application
-docker-compose up -d
+docker compose up -d
 
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
 # Stop the application
-docker-compose down
+docker compose down
 ```
 
 The application will be available at `http://localhost:8082` (mapped from port 8000 inside the container)
@@ -48,13 +48,13 @@ The application will be available at `http://localhost:8082` (mapped from port 8
 
 1. Create and activate a Python virtual environment:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Linux/Mac
+uv venv
+source .venv/bin/activate  # On Linux/Mac
 ```
 
 2. Install dependencies:
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
 
 3. Run the application:
@@ -83,10 +83,10 @@ uvicorn app.main:app --reload --port 8082 --host 0.0.0.0
 2. Then in another terminal, run the populate script:
 ```bash
 # Make sure your virtual environment is activated first
-source venv/bin/activate  # On Linux/Mac
+source .venv/bin/activate  # On Linux/Mac
 
 # Install dependencies if needed
-pip install -r requirements.txt
+uv sync
 
 # Run the populate script (uses default admin credentials)
 python scripts/populate_db.py
