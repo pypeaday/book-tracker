@@ -6,7 +6,13 @@ services:
     ports:
       - "8082:8000"
     volumes:
-      - ./data:/app/data
-      - ./migrations:/app/migrations
-      - ./alembic.ini:/app/alembic.ini
+      - book_data:/data
+    environment:
+      - DATABASE_URL=sqlite:///data/books.db
+      - ADMIN_EMAIL=admin@example.com
+      - ADMIN_PASSWORD=adminpassword
     restart: unless-stopped
+
+volumes:
+  book_data:
+    name: book_tracking_data

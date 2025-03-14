@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Book Tracking{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen px-4">
+    <div class="w-full max-w-md p-6 rounded-lg shadow-md" style="background-color: {{ theme.bg1 }}; border: 1px solid {{ theme.bg2 }};">
+        <h1 class="mb-6 text-2xl font-bold text-center" style="color: {{ theme.accent }};">Create Account</h1>
+        
+        {% if error %}
+        <div class="p-3 mb-4 rounded-md" style="background-color: {{ theme.error }}20; color: {{ theme.error }};">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <form action="/register" method="post" class="space-y-4">
+            <div>
+                <label for="email" class="block mb-1 text-sm font-medium" style="color: {{ theme.fg }};">Email</label>
+                <input type="email" id="email" name="email" required 
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2" 
+                    style="background-color: {{ theme.bg2 }}; color: {{ theme.fg }}; border-color: {{ theme.bg2 }}; focus:ring-color: {{ theme.accent }};">
+            </div>
+            
+            <div>
+                <label for="password" class="block mb-1 text-sm font-medium" style="color: {{ theme.fg }};">Password</label>
+                <input type="password" id="password" name="password" required minlength="8"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2" 
+                    style="background-color: {{ theme.bg2 }}; color: {{ theme.fg }}; border-color: {{ theme.bg2 }}; focus:ring-color: {{ theme.accent }};">
+                <p class="mt-1 text-xs" style="color: {{ theme.fg1 }};">
+                    Password must be at least 8 characters long
+                </p>
+            </div>
+            
+            <div>
+                <label for="confirm_password" class="block mb-1 text-sm font-medium" style="color: {{ theme.fg }};">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required minlength="8"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2" 
+                    style="background-color: {{ theme.bg2 }}; color: {{ theme.fg }}; border-color: {{ theme.bg2 }}; focus:ring-color: {{ theme.accent }};">
+            </div>
+            
+            <div>
+                <button type="submit" class="w-full px-4 py-2 text-white rounded-md hover:opacity-90 transition-opacity" 
+                    style="background-color: {{ theme.accent }};">
+                    Register
+                </button>
+            </div>
+        </form>
+        
+        <div class="mt-4 text-center">
+            <p style="color: {{ theme.fg1 }};">
+                Already have an account? 
+                <a href="/login" class="hover:underline" style="color: {{ theme.accent }};">Login</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

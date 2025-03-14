@@ -1,16 +1,62 @@
-from fastapi import FastAPI, Depends, HTTPException, Request, Form
+from fastapi import FastAPI, Depends, HTTPException, Request, Form, Cookie
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from pydantic import BaseModel, field_validator
 from datetime import datetime
 
-from . import models, database, themes
+from . import models, database, themes, auth, auth_routes, admin_routes
+from .auth import get_optional_current_user
 
 app = FastAPI(title="Book Tracking API")
 templates = Jinja2Templates(directory="app/templates")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify the allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Add middleware to extract token from cookies
+@app.middleware("http")
+async def cookie_to_authorization(request: Request, call_next):
+    # Extract token from cookie
+    token = request.cookies.get("access_token")
+    
+    # Check if we have a token and no authorization header already exists
+    has_auth_header = False
+    for k, v in request.scope.get("headers", []):
+        if k.decode().lower() == "authorization":
+            has_auth_header = True
+            break
+    
+    # Create a modified scope with the authorization header if token exists and no auth header
+    if token and not has_auth_header:
+        # Get the original headers as a list of tuples
+        headers = list(request.scope.get("headers", []))
+        
+        # Add the authorization header
+        auth_value = f"Bearer {token}"
+        headers.append((b"authorization", auth_value.encode()))
+        
+        # Update the scope headers
+        request.scope["headers"] = headers
+    
+    # Process the request and get the response
+    response = await call_next(request)
+    return response
+
+# Include auth routes
+app.include_router(auth_routes.router)
+
+# Include admin routes
+app.include_router(admin_routes.router)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -71,16 +117,50 @@ class Book(BookCreate):
     class Config:
         from_attributes = True
 
-# Create tables
-models.Base.metadata.create_all(bind=database.engine)
+# Create tables if they don't exist
+from sqlalchemy import inspect
+
+# Check if tables exist before creating them
+inspector = inspect(database.engine)
+existing_tables = inspector.get_table_names()
+
+# Only create tables that don't exist yet
+for table in models.Base.metadata.tables.values():
+    if table.name not in existing_tables:
+        table.create(database.engine)
 
 @app.get("/")
 def home(request: Request, db: Session = Depends(database.get_db)):
-    books = db.query(models.Book).all()
+    # Get current user from token cookie if available
+    access_token = request.cookies.get("access_token")
+    current_user = None
+    
+    if access_token:
+        # Token is stored without Bearer prefix
+        try:
+            current_user = auth.get_optional_current_user_sync(access_token, db)
+        except Exception as e:
+            # Invalid token, ignore and proceed as anonymous user
+            print(f"Authentication error: {e}")
+            pass
+    
+    # Get books (filter by user if logged in)
+    if current_user:
+        books = db.query(models.Book).filter(models.Book.user_id == current_user.id).all()
+    else:
+        # For anonymous users, show books without user_id (legacy data) or make them log in
+        books = db.query(models.Book).filter(models.Book.user_id is None).all()
+    
     theme, current_theme = get_current_theme(request)
     response = templates.TemplateResponse(
         "index.html",
-        {"request": request, "books": books, "theme": theme, "current_theme": current_theme}
+        {
+            "request": request, 
+            "books": books, 
+            "theme": theme, 
+            "current_theme": current_theme,
+            "user": current_user
+        }
     )
     response.set_cookie(
         key="theme",
@@ -174,22 +254,53 @@ def list_books(db: Session = Depends(database.get_db)):
     return books
 
 @app.post("/api/books/", response_model=Book)
-def create_book_api(book: BookCreate, db: Session = Depends(database.get_db)):
+def create_book_api(book: BookCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     # Convert empty string rating to None
     data = book.model_dump()
     if data.get('rating') == "":
         data['rating'] = None
+    
+    # Associate book with current user
+    data['user_id'] = current_user.id
+    
     db_book = models.Book(**data)
     db.add(db_book)
     db.commit()
     db.refresh(db_book)
     return db_book
 
-@app.delete("/api/books/{book_id}")
-def delete_book_api(book_id: int, db: Session = Depends(database.get_db)):
+@app.put("/api/books/{book_id}", response_model=Book)
+def update_book_api(book_id: int, book: BookCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
     if db_book is None:
         raise HTTPException(status_code=404, detail="Book not found")
+    
+    # Ensure the book belongs to the current user
+    if db_book.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this book")
+    
+    # Convert empty string rating to None
+    data = book.model_dump(exclude_unset=True)
+    if 'rating' in data and data['rating'] == "":
+        data['rating'] = None
+    
+    for key, value in data.items():
+        setattr(db_book, key, value)
+    
+    db.commit()
+    db.refresh(db_book)
+    return db_book
+
+@app.delete("/api/books/{book_id}")
+def delete_book_api(book_id: int, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if db_book is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    # Ensure the book belongs to the current user
+    if db_book.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this book")
+        
     db.delete(db_book)
     db.commit()
     return {"ok": True}

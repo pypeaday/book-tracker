@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}System Statistics{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <h1 class="text-2xl font-bold text-yellow-400 mb-6">System Statistics</h1>
+    
+    <div class="flex justify-end mb-4">
+        <a href="/admin/dashboard" class="text-blue-400 hover:text-aqua-400 transition">
+            Back to Dashboard
+        </a>
+    </div>
+    
+    <!-- User Book Counts -->
+    <div class="bg-bg1 border border-bg2 rounded-lg p-4 shadow-md mb-8">
+        <h2 class="text-xl font-semibold text-yellow-400 mb-4">Books by User</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-bg2 rounded-lg overflow-hidden">
+                <thead class="bg-bg3">
+                    <tr>
+                        <th class="py-2 px-4 text-left text-fg1">User</th>
+                        <th class="py-2 px-4 text-left text-fg1">Book Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in user_book_counts %}
+                    <tr class="border-t border-bg3">
+                        <td class="py-2 px-4">{{ user.email }}</td>
+                        <td class="py-2 px-4">{{ user.book_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Top Authors -->
+    <div class="bg-bg1 border border-bg2 rounded-lg p-4 shadow-md mb-8">
+        <h2 class="text-xl font-semibold text-yellow-400 mb-4">Top Authors</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-bg2 rounded-lg overflow-hidden">
+                <thead class="bg-bg3">
+                    <tr>
+                        <th class="py-2 px-4 text-left text-fg1">Author</th>
+                        <th class="py-2 px-4 text-left text-fg1">Book Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for author in top_authors %}
+                    <tr class="border-t border-bg3">
+                        <td class="py-2 px-4">{{ author.author }}</td>
+                        <td class="py-2 px-4">{{ author.book_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Visualization Placeholder -->
+    <div class="bg-bg1 border border-bg2 rounded-lg p-4 shadow-md">
+        <h2 class="text-xl font-semibold text-yellow-400 mb-4">Book Status Distribution</h2>
+        <div class="h-64 flex items-center justify-center bg-bg2 rounded-lg">
+            <p class="text-fg1">
+                Visualization could be added here with a JavaScript charting library like Chart.js
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -18,9 +18,9 @@ RUN mkdir -p /app/data && \
 # Set working directory
 WORKDIR /app
 
-# Copy entrypoint script
-COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
+# Copy entrypoint and admin scripts
+COPY docker-entrypoint.sh create_default_admin.py /app/
+RUN chmod +x /app/docker-entrypoint.sh /app/create_default_admin.py
 
 # Copy the rest of the application
 COPY --chown=appuser:appuser . .

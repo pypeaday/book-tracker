@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Book Tracking{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-8 mx-auto">
+    <div class="mb-8 p-6 rounded-lg shadow-md" style="background-color: {{ theme.bg1 }}; border: 1px solid {{ theme.bg2 }};">
+        <h1 class="text-2xl font-bold mb-4" style="color: {{ theme.accent }};">Your Profile</h1>
+        
+        <div class="mb-4">
+            <p class="text-lg" style="color: {{ theme.fg }};">
+                <span class="font-medium" style="color: {{ theme.fg1 }};">Email:</span> 
+                {{ user.email }}
+            </p>
+            <p class="text-sm mt-1" style="color: {{ theme.fg1 }};">
+                Account created: {{ user.created_at.strftime('%Y-%m-%d') }}
+            </p>
+        </div>
+        
+        <div class="flex space-x-4">
+            <a href="/" class="px-4 py-2 rounded-md text-white hover:opacity-90 transition-opacity" 
+                style="background-color: {{ theme.accent }};">
+                Back to Books
+            </a>
+            <a href="/logout" class="px-4 py-2 rounded-md text-white hover:opacity-90 transition-opacity" 
+                style="background-color: {{ theme.error }};">
+                Logout
+            </a>
+        </div>
+    </div>
+    
+    <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4" style="color: {{ theme.accent }};">Your Reading Statistics</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="p-4 rounded-lg shadow-md" style="background-color: {{ theme.bg1 }}; border: 1px solid {{ theme.bg2 }};">
+                <h3 class="text-lg font-medium mb-2" style="color: {{ theme.fg }};">Total Books</h3>
+                <p class="text-2xl font-bold" style="color: {{ theme.accent }};">{{ books|length }}</p>
+            </div>
+            
+            <div class="p-4 rounded-lg shadow-md" style="background-color: {{ theme.bg1 }}; border: 1px solid {{ theme.bg2 }};">
+                <h3 class="text-lg font-medium mb-2" style="color: {{ theme.fg }};">Reading</h3>
+                <p class="text-2xl font-bold" style="color: {{ theme.accent }};">
+                    {{ books|selectattr('status', 'equalto', 'reading')|list|length }}
+                </p>
+            </div>
+            
+            <div class="p-4 rounded-lg shadow-md" style="background-color: {{ theme.bg1 }}; border: 1px solid {{ theme.bg2 }};">
+                <h3 class="text-lg font-medium mb-2" style="color: {{ theme.fg }};">Completed</h3>
+                <p class="text-2xl font-bold" style="color: {{ theme.accent }};">
+                    {{ books|selectattr('status', 'equalto', 'completed')|list|length }}
+                </p>
+            </div>
+            
+            <div class="p-4 rounded-lg shadow-md" style="background-color: {{ theme.bg1 }}; border: 1px solid {{ theme.bg2 }};">
+                <h3 class="text-lg font-medium mb-2" style="color: {{ theme.fg }};">To Read</h3>
+                <p class="text-2xl font-bold" style="color: {{ theme.accent }};">
+                    {{ books|selectattr('status', 'equalto', 'to_read')|list|length }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div>
+        <h2 class="text-xl font-bold mb-4" style="color: {{ theme.accent }};">Recent Books</h2>
+        
+        {% if books %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for book in books[:6] %}
+            <div class="p-4 rounded-lg shadow-md" style="background-color: {{ theme.bg1 }}; border: 1px solid {{ theme.bg2 }};">
+                <h3 class="text-lg font-medium mb-1" style="color: {{ theme.fg }};">{{ book.title }}</h3>
+                <p class="text-sm mb-2" style="color: {{ theme.fg1 }};">{{ book.author }}</p>
+                
+                <div class="flex justify-between items-center">
+                    <span class="px-2 py-1 text-xs rounded-md" 
+                        style="background-color: {{ theme.bg2 }}; color: {{ theme.fg }};">
+                        {{ book.status.replace('_', ' ').title() }}
+                    </span>
+                    
+                    {% if book.rating is not none %}
+                    <span class="text-sm" style="color: {{ theme.accent }};">
+                        Rating: {{ book.rating }}/3
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if books|length > 6 %}
+        <div class="mt-4 text-center">
+            <a href="/" class="text-sm hover:underline" style="color: {{ theme.accent }};">
+                View all {{ books|length }} books
+            </a>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <p style="color: {{ theme.fg1 }};">You haven't added any books yet.</p>
+        <a href="/add-book" class="inline-block mt-2 px-4 py-2 rounded-md text-white hover:opacity-90 transition-opacity" 
+            style="background-color: {{ theme.accent }};">
+            Add Your First Book
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

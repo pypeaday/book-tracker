@@ -53,11 +53,30 @@ docker run -d \
   -p 8082:8000 \
   -v book_tracking_data:/app/data \
   -e DATABASE_URL=sqlite:///data/books.db \
+  -e ADMIN_EMAIL=admin@example.com \
+  -e ADMIN_PASSWORD=adminpassword \
   --name book-tracker \
   book-tracker
 ```
 
 The application will be available at `http://localhost:8082` (mapped from port 8000 inside the container)
+
+### Admin User
+
+A default admin user is automatically created when the application starts:
+- Email: admin@example.com
+- Password: adminpassword
+
+You can customize the admin credentials by setting the following environment variables:
+- `ADMIN_EMAIL`: Custom email for the admin user
+- `ADMIN_PASSWORD`: Custom password for the admin user
+
+The admin dashboard is accessible at `/admin/dashboard` after logging in with admin credentials.
+
+Admin features include:
+- User management (view, activate/deactivate, change roles)
+- System statistics
+- Book usage analytics
 
 ### Local Development Setup
 

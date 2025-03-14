@@ -17,6 +17,10 @@ print("Database tables created successfully")
 echo "Running database migrations..."
 alembic upgrade head
 
+# Create default admin user
+echo "Creating default admin user..."
+python create_default_admin.py
+
 # Start the application
 echo "Starting application..."
 exec uvicorn app.main:app --host 0.0.0.0 --port 8000
