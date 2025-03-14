@@ -100,7 +100,7 @@ The application will be available at `http://localhost:8082`
 
 ### Loading Sample Data
 
-To populate the database with sample books:
+To populate the database with sample books for the admin user:
 
 1. First, make sure the application is running:
 ```bash
@@ -115,8 +115,11 @@ source venv/bin/activate  # On Linux/Mac
 # Install dependencies if needed
 pip install -r requirements.txt
 
-# Run the populate script
+# Run the populate script (uses default admin credentials)
 python scripts/populate_db.py
+
+# Or specify custom admin credentials
+python scripts/populate_db.py --email admin@example.com --password adminpassword
 ```
 
 This will add 10 sample books across different reading statuses with notes and dates, including:
@@ -125,7 +128,10 @@ This will add 10 sample books across different reading statuses with notes and d
 - Books on the to-read list
 - Books on hold or DNF with explanations
 
-The script uses the application's API endpoints, so it requires the app to be running at http://localhost:8082.
+The script uses the application's API endpoints, so it requires the app to be running at http://localhost:8082. It will:
+1. Log in as the admin user
+2. Delete any existing books for that user
+3. Add the sample books to the admin's collection
 
 ## Features
 
