@@ -7,10 +7,9 @@ services:
       - "8082:8000"
     volumes:
       - book_data:/data
+    env_file: .env
     environment:
       - DATABASE_URL=sqlite:///data/books.db
-      - ADMIN_EMAIL=admin@example.com
-      - ADMIN_PASSWORD=adminpassword
     restart: unless-stopped
 
 volumes:
