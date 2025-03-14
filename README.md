@@ -30,16 +30,16 @@ The easiest way to run Book Tracking is with Docker:
 
 ```bash
 # Start the application
-docker-compose up -d
+docker compose up -d
 ```
 
-The application will be available at `http://localhost:8082`
+The application will be available at `http://localhost:8080`
 
 *For developers: See [DEVELOPER.md](DEVELOPER.md) for detailed setup instructions and technical information.*
 
 ### Creating an Account
 
-1. Visit `http://localhost:8082` in your browser
+1. Visit `http://localhost:8080` in your browser
 2. Click "Register" and create your account
 3. Log in with your new credentials
 

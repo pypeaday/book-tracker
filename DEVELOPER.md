@@ -24,7 +24,7 @@ docker compose logs -f
 docker compose down
 ```
 
-The application will be available at `http://localhost:8082` (mapped from port 8000 inside the container)
+The application will be available at `http://localhost:8080` (mapped from port 8000 inside the container)
 
 #### 2. Using Docker directly:
 ```bash
@@ -33,7 +33,7 @@ docker build -t book-tracker .
 
 # Run the container
 docker run -d \
-  -p 8082:8000 \
+  -p 8080:8000 \
   -v book_tracking_data:/app/data \
   -e DATABASE_URL=sqlite:///data/books.db \
   -e ADMIN_EMAIL=admin@example.com \
@@ -42,7 +42,7 @@ docker run -d \
   book-tracker
 ```
 
-The application will be available at `http://localhost:8082` (mapped from port 8000 inside the container)
+The application will be available at `http://localhost:8080` (mapped from port 8000 inside the container)
 
 ### Local Development Setup
 
@@ -77,7 +77,7 @@ To populate the database with sample books for the admin user:
 
 1. First, make sure the application is running:
 ```bash
-uvicorn app.main:app --reload --port 8082 --host 0.0.0.0
+uvicorn app.main:app --reload --port 8080 --host 0.0.0.0
 ```
 
 2. Then in another terminal, run the populate script:
@@ -89,10 +89,11 @@ source .venv/bin/activate  # On Linux/Mac
 uv sync
 
 # Run the populate script (uses default admin credentials)
-python scripts/populate_db.py
+python scripts/populate_db.py --url http://localhost:8080
+
 
 # Or specify custom admin credentials
-python scripts/populate_db.py --email admin@example.com --password adminpassword
+python scripts/populate_db.py --email admin@example.com --password adminpassword --url http://localhost:8080
 ```
 
 This will add 10 sample books across different reading statuses with notes and dates.
