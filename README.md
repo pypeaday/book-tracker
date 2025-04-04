@@ -1,8 +1,7 @@
 # Book Tracking
 
-A modern, mobile-friendly application to track your reading progress and manage your book collection.
+I replaced this with [great-reads](https://www.github.com/pypeaday/great-reads)
 
-![Book Tracking App](https://via.placeholder.com/800x400?text=Book+Tracking+App)
 
 ## What is Book Tracking?
 
